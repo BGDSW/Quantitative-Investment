@@ -1,7 +1,13 @@
 import requests
 
 
-def Get_BeiJing_Time(get_day=False, get_second=False):
+def Get_BeiJing_Time(get_day=False, get_second=False, beautiful=False):
+    '''
+    :param get_day: 是否返回周几
+    :param get_second: 是否返回秒
+    :param beautiful: 是否以美观形式返回（只用于记录日志）
+    :return:
+    '''
     url = 'https://www.beijing-time.org/t/time.asp'
     page = requests.get(url, headers={
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"})
@@ -18,6 +24,15 @@ def Get_BeiJing_Time(get_day=False, get_second=False):
                                date.rjust(2, '0'),
                                hour.rjust(2, '0'),
                                minute.rjust(2, '0'))
+    if(beautiful):
+        beautiful_date = '{}-{}-{}-{}-{}'.format(year,
+                                   month.rjust(2, '0'),
+                                   date.rjust(2, '0'),
+                                   hour.rjust(2, '0'),
+                                   minute.rjust(2, '0'))
+        if (get_second):
+            beautiful_date += '-' + second.rjust(2, '0')
+        return beautiful_date
     if (get_day):
         return date, day
     if (get_second):

@@ -29,7 +29,7 @@ class Test:
                 self.strategy.GetNewData(two_day_stock.loc[i])
                 suggest = self.strategy.Suggest()
                 if (suggest['OPT'] != 'None'):
-                    stock_code = self.stockData.Get_Stock()
+                    stock_code = self.stockData.Get_Stock_Code()
                     if (suggest['OPT'] == 'Buy'):
                         com_fee = suggest['Num'] * suggest['Price'] * self.commission
                         if(com_fee < 5):

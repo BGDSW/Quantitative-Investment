@@ -7,13 +7,23 @@ import pytesseract
 from PIL import Image
 
 if __name__ == '__main__':
-    client = MUMUClient()
-    client.Connect()
+    with open('./ttt.txt', 'w') as f:
+        message =\
+'''
+==========================Agent Init==========================
+time:{}
+current_all_money:{}
+current_available_money:{}
+holding_stocks:{}
+'''
+        f.write(message)
+    # client = MUMUClient()
+    # client.Connect()
     # client.Capture()
     # client.Disconnect()
-    a = client.Check_Hold(total_money=True, stock_value=True, available_money=True, retrievable_money=True, stock_hold_available=True, stock_cost=True)
-    print(a)
-    client.Disconnect()
+    # a = client.Check_Hold(total_money=True, stock_value=True, available_money=True, retrievable_money=True, stock_hold_available=True, stock_cost=True)
+    # print(a)
+    # client.Disconnect()
     # print(b)
     # print(c)
     # print(d)
@@ -21,11 +31,11 @@ if __name__ == '__main__':
     # client.Click(client._Coordinates['HOLD'][0], client._Coordinates['HOLD'][1])
 
     # img = cv2.imread('D:\\code_for_python\\Quantitative_Investment_PE\\Pictures\\tmp.png')
-    # img_crop = img[1130:1200,920:1070,0] + img[1140:1200,920:1070,2]
-    # img_crop = img[1130:1190,660:860,0] + img[1130:1190,660:860,2]
-    # text = pytesseract.image_to_string(img_crop, lang='chi_sim')
-    # print(text.repalce[])
-    # print(np.max(img_crop))
+    # img_crop = img[1230:1300, 660:860, 0] + img[1230:1300, 660:860, 2]
+    # # img_crop = img[1130:1190,660:860,0] + img[1130:1190,660:860,2]
+    # # text = pytesseract.image_to_string(img_crop, lang='chi_sim')
+    # # print(text.repalce[])
+    # # print(np.max(img_crop))
     # cv2.imshow('1', img_crop)
     # cv2.waitKey(0)
 

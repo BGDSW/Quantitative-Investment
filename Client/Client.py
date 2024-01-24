@@ -261,7 +261,8 @@ class MUMUClient(Client):
             text = pytesseract.image_to_string(img_crop)
             text = text.replace('\n', '').replace(',', '')
             ans.append(float(text))
-        if(stock_hold_available or stock_cost):
+
+        if(stock_hold or stock_hold_available or stock_cost):
             # 第一支股票
             img_crop = img[1060:1130,20:350,0] + img[1060:1130,20:350,2]
             text = pytesseract.image_to_string(img_crop, lang='chi_sim')
@@ -270,6 +271,20 @@ class MUMUClient(Client):
             img_crop = img[1230:1300, 20:350, 0] + img[1230:1300, 20:350, 2]
             text = pytesseract.image_to_string(img_crop, lang='chi_sim')
             stock_name_2 = text.replace('\n', '').replace(' ', '')
+            if (stock_hold):
+                ans_stock_hold = {}
+                img_crop = img[1060:1130, 660:860, 0] + img[1060:1130, 660:860, 2]
+                text = pytesseract.image_to_string(img_crop)
+                text = text.replace('\n', '').replace(',', '')
+                ans_stock_hold[self.Stock_Code[stock_name_1]] = int(text)
+
+                img_crop = img[1230:1300, 660:860, 0] + img[1230:1300, 660:860, 2]
+                text = pytesseract.image_to_string(img_crop)
+                text = text.replace('\n', '').replace(',', '')
+                ans_stock_hold[self.Stock_Code[stock_name_2]] = int(text)
+
+                ans.append(ans_stock_hold)
+
             if(stock_hold_available):
                 ans_stock_hold_available = {}
                 img_crop = img[1130:1190, 660:860, 0] + img[1130:1190, 660:860, 2]

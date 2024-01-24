@@ -81,5 +81,5 @@ class StockData():
     def add_stock_data(self, df, new_data):
         return pd.concat([df, new_data], axis=0, ignore_index=True)
 
-    def Get_Stock(self):
+    def Get_Stock_Code(self):
         return self.location+self.stock_no

@@ -19,7 +19,7 @@ def test():
     # stockData = StockData('sh', '601169')
     stockData = StockData('sh', '601398')
     # stockData = StockData('sh', '600036')
-    strategy = MeanStrategy(rate=0.005, buy_num=1000,commission=0.0003)
+    strategy = MeanStrategy(rate=0.004, buy_num=1000,commission=0.0003)
     agent = Test(client, stockData, strategy)
     agent.run()
     agent.Report()
@@ -27,13 +27,15 @@ def test():
 
 def main():
     client = MUMUClient()
-    # client.Connect()
-    stockData = StockData('sh', '601398')
-    strategy = MeanStrategy(rate=0.004, buy_num=1000,commission=0.0003)
-    agent = Agent(client, stockData, strategy)
+    client.Connect()
+    stockData1 = StockData('sh', '601398')
+    strategy1 = MeanStrategy(rate=0.004, buy_num=1000,commission=0.0003)
+    stockData2 = StockData('sh', '601169')
+    strategy2 = MeanStrategy(rate=0.004, buy_num=1000,commission=0.0003)
+    agent = Agent(client, [stockData1, stockData2], [strategy1, strategy2])
     agent.run()
     agent.Report()
-    # client.Disconnect()
+    client.Disconnect()
 
 
 if __name__ == '__main__':

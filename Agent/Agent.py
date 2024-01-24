@@ -9,24 +9,42 @@ from Data import Time
 
 
 class Agent:
-    def __init__(self, client, stockData, strategy):
+    def __init__(self, client, stockData:list, strategy:list):
         self.client = client
-        self.stockData = stockData
-        self.strategy = strategy
         self.init_Money = 200000
         self.Money = 200000
         self.stock = {}
         self.use_time = ''
-        self.current_price = -1
-        self.buy_cnt = 0
-        self.sell_cnt = 0
-        self.commission = strategy.commission
+        self.current_price = {}
+        self.buy_cnt = {}
+        self.sell_cnt = {}
         self.transfer_fee = 0.00002
         self.tax = 0.001
-        self.last_opt_time = ''
+        self.last_opt_time = {}
 
-        self.init_Money = self.client.Check_Hold(total_money=True)
+        self.stock_tool = {}
+        cur_time = Time.Get_BeiJing_Time(get_second=True)
+        for i in range(len(stockData)):
+            stock_code = stockData[i].Get_Stock_Code()
+            self.stock_tool[stock_code] = {'stockData': stockData[i], 'strategy': strategy[i]}
+            self.buy_cnt[stock_code] = 0
+            self.sell_cnt[stock_code] = 0
+            self.last_opt_time[stock_code] = cur_time
 
+        cur_time = Time.Get_BeiJing_Time(beautiful=True)
+        self.log_file_path = 'D:\\code_for_python\\Quantitative_Investment_PE\\Log\\{}.txt'.format(cur_time)
+        self.init_Money, self.Money, stock_hold, self.stock = self.client.Check_Hold(total_money=True,
+                                                                                     available_money=True,
+                                                                                     stock_hold=True,
+                                                                                     stock_hold_available=True)
+
+        message = '\n==========================Agent Init==========================\n' + \
+                  'time:{}\n'.format(cur_time) + \
+                  'current_all_money:{}\n'.format(self.init_Money) + \
+                  'current_available_money:{}\n'.format(self.Money) + \
+                  'holding_stocks:{}'.format(str(stock_hold))
+
+        self.Record_Log(message)
 
     def If_Market_Open(self):
         current_time = Time.Get_BeiJing_Time()
@@ -35,8 +53,8 @@ class Agent:
             return False
         return True
 
-    def If_New_Data(self, data):
-        last_hour, last_minute = Time.Split_Time(self.last_opt_time, Hour=True, Minute=True)
+    def If_New_Data(self, data, stock_code):
+        last_hour, last_minute = Time.Split_Time(self.last_opt_time[stock_code], Hour=True, Minute=True)
         new_hour, new_minute = Time.Split_Time(data['time'], Hour=True, Minute=True)
         if(new_hour>last_hour):
             return True
@@ -48,60 +66,79 @@ class Agent:
     def Refresh_Status(self):
         self.Money, self.stock = self.client.Check_Hold(available_money=True, stock_hold_available=True)
 
+    def Operation(self, stock_code):
+        stockData = self.stock_tool[stock_code]['stockData']
+        strategy = self.stock_tool[stock_code]['strategy']
+        code, current_stock = stockData.get_stock_currentData(stockData.location, stockData.stock_no)
+        if (not self.If_New_Data(current_stock, stock_code)):
+            return
+        self.current_price[stock_code] = current_stock['close']
+        if (code):
+            strategy.GetNewData(current_stock)
+            suggest = strategy.Suggest()
+            if (suggest['OPT'] != 'None'):
+                if (suggest['OPT'] == 'Buy'):
+                    com_fee = suggest['Num'] * suggest['Price'] * strategy.commission
+                    if (com_fee < 5):
+                        com_fee = 5
+                    ex_fee = suggest['Num'] * suggest['Price'] * self.transfer_fee
+                    if (self.Money < suggest['Num'] * suggest['Price'] + com_fee + ex_fee):
+                        return
+                    else:
+                        self.buy_cnt[stock_code] += 1
+                        self.client.Buy(stock_code, str(suggest['Num']), str(suggest['Price']))
+
+                if (suggest['OPT'] == 'Sell'):
+                    if (stock_code in self.stock.keys()):
+                        self.sell_cnt[stock_code] += 1
+                        if (self.stock[stock_code] < suggest['Num']):
+                            self.client.Sell(stock_code, str(self.stock[stock_code]), str(suggest['Price']))
+                        else:
+                            self.client.Sell(stock_code, str(suggest['Num']), str(suggest['Price']))
+                self.last_opt_time[stock_code] = current_stock['time']
+
+                message = '\n==========================Operation==========================\n' +\
+                          'stock_code:{}\n'.format(stock_code)+\
+                          'time:{}\n'.format(current_stock['time'])+\
+                          'operation:{}\n'.format(str(suggest))+\
+                          'buy_cnt:{}\n'.format(self.buy_cnt[stock_code])+\
+                          'sell_cnt:{}\n'.format(self.sell_cnt[stock_code])
+                self.Record_Log(message)
 
     def run(self):
-        self.last_opt_time = Time.Get_BeiJing_Time(get_second=True)
-        self.use_time = self.last_opt_time + ' - '
+        self.use_time = Time.Get_BeiJing_Time(get_second=True) + ' - '
         while(self.If_Market_Open()):
-            self.Refresh_Status()
-            code, current_stock = self.stockData.get_stock_currentData(self.stockData.location, self.stockData.stock_no)
-            if(not self.If_New_Data(current_stock)):
-                time.sleep(20)
-                continue
-            self.current_price = current_stock['close']
-            if (code):
-                self.strategy.GetNewData(current_stock)
-                suggest = self.strategy.Suggest()
-                if (suggest['OPT'] != 'None'):
-                    stock_code = self.stockData.Get_Stock()
-                    if (suggest['OPT'] == 'Buy'):
-                        com_fee = suggest['Num'] * suggest['Price'] * self.commission
-                        if(com_fee < 5):
-                            com_fee = 5
-                        ex_fee = suggest['Num'] * suggest['Price'] * self.transfer_fee
-                        if (self.Money < suggest['Num'] * suggest['Price'] + com_fee + ex_fee):
-                            continue
-                        else:
-                            self.buy_cnt += 1
-                            # if (stock_code in self.stock.keys()):
-                            #     self.stock[stock_code] += suggest['Num']
-                            # else:
-                            #     self.stock[stock_code] = suggest['Num']
-                            self.client.Buy(stock_code, str(suggest['Num']), str(suggest['Price']))
-                            self.Money -= suggest['Num'] * suggest['Price'] + com_fee + ex_fee
+            for stock_code in self.stock_tool.keys():
+                cur_time = Time.Get_BeiJing_Time(beautiful=True, get_second=True)
+                all_money, self.Money, stock_hold, self.stock = self.client.Check_Hold(total_money=True,
+                                                                                       available_money=True,
+                                                                                       stock_hold=True,
+                                                                                       stock_hold_available=True)
 
-                    if (suggest['OPT'] == 'Sell'):
-                        if (stock_code in self.stock.keys()):
-                            self.sell_cnt += 1
-                            if (self.stock[stock_code] < suggest['Num']):
-                                com_fee = self.stock[stock_code] * suggest['Price'] * self.commission
-                                if (com_fee < 5):
-                                    com_fee = 5
-                                ex_fee = self.stock[stock_code] * suggest['Price'] * (self.transfer_fee + self.tax)
-                                self.client.Sell(stock_code, str(self.stock[stock_code]), str(suggest['Price']))
-                                self.Money += self.stock[stock_code] * suggest['Price'] - com_fee - ex_fee
-
-                            else:
-                                com_fee = suggest['Num'] * suggest['Price'] * self.commission
-                                if (com_fee < 5):
-                                    com_fee = 5
-                                ex_fee = suggest['Num'] * suggest['Price'] * (self.transfer_fee + self.tax)
-                                # self.stock[stock_code] -= suggest['Num']
-                                self.client.Sell(stock_code, str(suggest['Num']), str(suggest['Price']))
-                                self.Money += suggest['Num'] * suggest['Price'] - com_fee - ex_fee
-                            # if (self.stock[stock_code] == 0):
-                            #     del self.stock[stock_code]
+                message = '\n==========================Record Status==========================\n'+\
+                          'time:{}\n'.format(cur_time)+\
+                          'current_all_money:{}\n'.format(all_money)+\
+                          'current_available_money:{}\n'.format(self.Money)+\
+                          'holding_stocks:{}\n'.format(str(stock_hold))
+                self.Record_Log(message)
+                self.Operation(stock_code)
+            time.sleep(10)
         self.use_time += Time.Get_BeiJing_Time(get_second=True)
+        all_money, self.Money, stock_hold, self.stock = self.client.Check_Hold(total_money=True,
+                                                                               available_money=True,
+                                                                               stock_hold=True,
+                                                                               stock_hold_available=True)
+
+        message = '\n==========================Summary==========================\n'+\
+                  'time:{}\n'.format(self.use_time)+\
+                  'current_all_money:{}\n'.format(all_money)+\
+                  'income(include stock):{}\n'.format(all_money-self.init_Money)+\
+                  'yield(include stock):{}%\n'.format(((all_money-self.init_Money)/self.init_Money-1)*100)+\
+                  'current_available_money:{}\n'.format(self.Money)+\
+                  'current_stock_value:{}\n'.format(all_money-self.Money)+\
+                  'holding_stocks:{}\n'.format(str(stock_hold))
+
+        self.Record_Log(message)
 
     def Report(self):
         self.Refresh_Status()
@@ -125,3 +162,7 @@ class Agent:
         print('yield(include stock): {}%'.format((all_money / self.init_Money - 1) * 100))
         print('buy operation: {}'.format(self.buy_cnt))
         print('sell operation: {}'.format(self.sell_cnt))
+
+    def Record_Log(self, message):
+        with open(self.log_file_path, 'a+') as f:
+            f.write(message)
