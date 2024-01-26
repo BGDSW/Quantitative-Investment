@@ -117,7 +117,7 @@ class Agent:
     def run(self):
         self.use_time = Time.Get_BeiJing_Time(get_second=True) + ' - '
         while(self.If_Market_Open()):
-            if(not self.If_Market_Sleep()):
+            if(self.If_Market_Sleep()):
                 time.sleep(30)
                 continue
             for stock_code in self.stock_tool.keys():

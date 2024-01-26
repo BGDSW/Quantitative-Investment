@@ -1,0 +1,17 @@
+
+==========================Agent Init==========================
+time:2024-01-26-13-32
+current_all_money:203069.03
+current_available_money:103169.03
+holding_stocks:{'sh601169': 10000, 'sh601398': 10000}
+==========================Record Status==========================
+time:2024-01-26-13-32-47
+current_all_money:202669.03
+current_available_money:103169.03
+holding_stocks:{'sh601169': 10000, 'sh601398': 10000}
+
+==========================Record Status==========================
+time:2024-01-26-13-32-53
+current_all_money:202569.03
+current_available_money:103169.03
+holding_stocks:{'sh601169': 10000, 'sh601398': 10000}
