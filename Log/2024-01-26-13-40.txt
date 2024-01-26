@@ -1,0 +1,6 @@
+
+==========================Agent Init==========================
+time:2024-01-26-13-40
+current_all_money:203269.03
+current_available_money:103169.03
+holding_stocks:{'sh601169': 10000, 'sh601398': 10000}
