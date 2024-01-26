@@ -28,7 +28,7 @@ class MeanStrategy(Strategy):
         self.commission = commission
 
     def GetNewData(self, data):
-        price = float(data['close'])
+        price = float(data['close'][0])
         if (self.cnt < 10):
             self.mean.put(price)
             self.mean_value += price

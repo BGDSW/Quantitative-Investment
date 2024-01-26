@@ -19,26 +19,26 @@ def Get_BeiJing_Time(get_day=False, get_second=False, beautiful=False):
     hour = text[5].split('=')[-1]
     minute = text[6].split('=')[-1]
     second = text[7].split('=')[-1]
-    date = '{}{}{}{}{}'.format(year,
+    ans = '{}{}{}{}{}'.format(year,
                                month.rjust(2, '0'),
                                date.rjust(2, '0'),
                                hour.rjust(2, '0'),
                                minute.rjust(2, '0'))
     if(beautiful):
-        beautiful_date = '{}-{}-{}-{}-{}'.format(year,
+        beautiful_ans = '{}-{}-{}-{}-{}'.format(year,
                                    month.rjust(2, '0'),
                                    date.rjust(2, '0'),
                                    hour.rjust(2, '0'),
                                    minute.rjust(2, '0'))
         if (get_second):
-            beautiful_date += '-' + second.rjust(2, '0')
-        return beautiful_date
+            beautiful_ans += '-' + second.rjust(2, '0')
+        return beautiful_ans
     if (get_day):
-        return date, day
+        return ans, day
     if (get_second):
-        return date + second.rjust(2, '0')
+        return ans + second.rjust(2, '0')
     else:
-        return date
+        return ans
 
 def Split_Time(time:str, Int=True, Year=False, Month=False, Date=False, Hour=False, Minute=False, Second=False):
         ans = []

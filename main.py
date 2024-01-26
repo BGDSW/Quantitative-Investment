@@ -34,10 +34,10 @@ def main():
     strategy2 = MeanStrategy(rate=0.004, buy_num=1000,commission=0.0003)
     agent = Agent(client, [stockData1, stockData2], [strategy1, strategy2])
     agent.run()
-    agent.Report()
+    # agent.Report()
     client.Disconnect()
 
 
 if __name__ == '__main__':
-    test()
+    main()
 

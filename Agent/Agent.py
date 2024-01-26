@@ -53,9 +53,18 @@ class Agent:
             return False
         return True
 
+    def If_Market_Sleep(self):
+        current_time = Time.Get_BeiJing_Time()
+        hour, minute = Time.Split_Time(current_time, Hour=True, Minute=True)
+        if(hour == 11 and minute >= 29):
+            return True
+        if (hour == 12):
+            return True
+        return False
+
     def If_New_Data(self, data, stock_code):
         last_hour, last_minute = Time.Split_Time(self.last_opt_time[stock_code], Hour=True, Minute=True)
-        new_hour, new_minute = Time.Split_Time(data['time'], Hour=True, Minute=True)
+        new_hour, new_minute = Time.Split_Time(data['time'][0], Hour=True, Minute=True)
         if(new_hour>last_hour):
             return True
         elif(new_hour==last_hour and new_minute > last_minute):
@@ -72,7 +81,7 @@ class Agent:
         code, current_stock = stockData.get_stock_currentData(stockData.location, stockData.stock_no)
         if (not self.If_New_Data(current_stock, stock_code)):
             return
-        self.current_price[stock_code] = current_stock['close']
+        self.current_price[stock_code] = current_stock['close'][0]
         if (code):
             strategy.GetNewData(current_stock)
             suggest = strategy.Suggest()
@@ -95,11 +104,11 @@ class Agent:
                             self.client.Sell(stock_code, str(self.stock[stock_code]), str(suggest['Price']))
                         else:
                             self.client.Sell(stock_code, str(suggest['Num']), str(suggest['Price']))
-                self.last_opt_time[stock_code] = current_stock['time']
+                self.last_opt_time[stock_code] = current_stock['time'][0]
 
                 message = '\n==========================Operation==========================\n' +\
                           'stock_code:{}\n'.format(stock_code)+\
-                          'time:{}\n'.format(current_stock['time'])+\
+                          'time:{}\n'.format(current_stock['time'][0])+\
                           'operation:{}\n'.format(str(suggest))+\
                           'buy_cnt:{}\n'.format(self.buy_cnt[stock_code])+\
                           'sell_cnt:{}\n'.format(self.sell_cnt[stock_code])
@@ -108,6 +117,9 @@ class Agent:
     def run(self):
         self.use_time = Time.Get_BeiJing_Time(get_second=True) + ' - '
         while(self.If_Market_Open()):
+            if(not self.If_Market_Sleep()):
+                time.sleep(30)
+                continue
             for stock_code in self.stock_tool.keys():
                 cur_time = Time.Get_BeiJing_Time(beautiful=True, get_second=True)
                 all_money, self.Money, stock_hold, self.stock = self.client.Check_Hold(total_money=True,
