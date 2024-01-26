@@ -83,6 +83,8 @@ class Agent:
             return
         self.current_price[stock_code] = current_stock['close'][0]
         if (code):
+            print_message = '================={}================'.format(stock_code)
+            print(print_message)
             strategy.GetNewData(current_stock)
             suggest = strategy.Suggest()
             if (suggest['OPT'] != 'None'):
