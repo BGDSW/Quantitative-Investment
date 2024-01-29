@@ -19,7 +19,7 @@ def test():
     # stockData = StockData('sh', '601169')
     stockData = StockData('sh', '601398')
     # stockData = StockData('sh', '600036')
-    strategy = MeanStrategy(rate=0.004, buy_num=1000,commission=0.0003)
+    strategy = MeanStrategy(rate=0.004, buy_num=100,commission=0.0003,report=True)
     agent = Test(client, stockData, strategy)
     agent.run()
     agent.Report()

@@ -64,7 +64,7 @@ class Agent:
 
     def If_New_Data(self, data, stock_code):
         last_hour, last_minute = Time.Split_Time(self.last_opt_time[stock_code], Hour=True, Minute=True)
-        new_hour, new_minute = Time.Split_Time(data['time'][0], Hour=True, Minute=True)
+        new_hour, new_minute = Time.Split_Time(data['time'], Hour=True, Minute=True)
         if(new_hour>last_hour):
             return True
         elif(new_hour==last_hour and new_minute > last_minute):
@@ -79,9 +79,10 @@ class Agent:
         stockData = self.stock_tool[stock_code]['stockData']
         strategy = self.stock_tool[stock_code]['strategy']
         code, current_stock = stockData.get_stock_currentData(stockData.location, stockData.stock_no)
+        current_stock = current_stock.loc[0]
         if (not self.If_New_Data(current_stock, stock_code)):
             return
-        self.current_price[stock_code] = current_stock['close'][0]
+        self.current_price[stock_code] = current_stock['close']
         if (code):
             print_message = '================={}================'.format(stock_code)
             print(print_message)
@@ -106,11 +107,11 @@ class Agent:
                             self.client.Sell(stock_code, str(self.stock[stock_code]), str(suggest['Price']))
                         else:
                             self.client.Sell(stock_code, str(suggest['Num']), str(suggest['Price']))
-                self.last_opt_time[stock_code] = current_stock['time'][0]
+                self.last_opt_time[stock_code] = current_stock['time']
 
                 message = '\n==========================Operation==========================\n' +\
                           'stock_code:{}\n'.format(stock_code)+\
-                          'time:{}\n'.format(current_stock['time'][0])+\
+                          'time:{}\n'.format(current_stock['time'])+\
                           'operation:{}\n'.format(str(suggest))+\
                           'buy_cnt:{}\n'.format(self.buy_cnt[stock_code])+\
                           'sell_cnt:{}\n'.format(self.sell_cnt[stock_code])

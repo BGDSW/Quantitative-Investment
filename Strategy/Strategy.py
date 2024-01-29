@@ -18,7 +18,7 @@ class Strategy:
 
 
 class MeanStrategy(Strategy):
-    def __init__(self, rate=0.05, buy_num=100, commission=0.03):
+    def __init__(self, rate=0.05, buy_num=100, commission=0.03, report=True):
         self.mean = queue.Queue()
         self.mean_value = 0
         self.cnt = 0
@@ -26,9 +26,10 @@ class MeanStrategy(Strategy):
         self.rate = rate
         self.buy_num = buy_num
         self.commission = commission
+        self.report = report
 
     def GetNewData(self, data):
-        price = float(data['close'][0])
+        price = float(data['close'])
         print_message = '***MeanStrategy GetData***\nCurrent_price:{}\nMean_price:'.format(price)
         if (self.cnt < 10):
             self.mean.put(price)
@@ -43,7 +44,8 @@ class MeanStrategy(Strategy):
             self.mean_value += price
             self.current_data = price
             print_message += '{}'.format(self.mean_value / 10)
-        print(print_message)
+        if(self.report):
+            print(print_message)
 
     def Suggest(self):
         print_message = '\n***MeanStrategy Suggest***\nCurrent_price:{}\nMean_price:'.format(self.current_data)
@@ -67,5 +69,6 @@ class MeanStrategy(Strategy):
                              'UpperExpectation:{}\n'.format(self.mean_value / 10 * (1 + self.rate)) + \
                              'LowerExpectation:{}\n'.format(self.mean_value / 10 * (1 - self.rate)) + \
                              'OPT:NONE'
-        print(print_message)
+        if (self.report):
+            print(print_message)
         return suggest

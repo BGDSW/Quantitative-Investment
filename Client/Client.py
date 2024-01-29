@@ -239,6 +239,7 @@ class MUMUClient(Client):
         '''
         ans = []
         self.Click(self._Coordinates['HOLD'][0], self._Coordinates['HOLD'][1])
+        time.sleep(1)
         file_path = self.Capture()
         img = cv2.imread(file_path)
         if(total_money):

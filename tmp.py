@@ -5,18 +5,24 @@ import numpy as np
 from Data import Time
 import pytesseract
 from PIL import Image
+from Data import DataFetch
 
 if __name__ == '__main__':
-    with open('./ttt.txt', 'w') as f:
-        message =\
-'''
-==========================Agent Init==========================
-time:{}
-current_all_money:{}
-current_available_money:{}
-holding_stocks:{}
-'''
-        f.write(message)
+
+    data = DataFetch.StockData('sh', '601398')
+    _, d1 = data.get_stock_history1minData()
+    _, d2 = data.get_stock_currentData()
+    d2 = d2.loc[0]
+    print(d1)
+    print('-------------')
+    print(d2)
+    print('--------------')
+    print(d2['time'])
+    print('--------------')
+    print(type(d2['time']))
+    print(type(d2['close']))
+
+
     # client = MUMUClient()
     # client.Connect()
     # client.Capture()

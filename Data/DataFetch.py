@@ -15,28 +15,22 @@ class StockData():
         if (success):
             stock_list = stock_info['data']['{}{}'.format(self.location, self.stock_no)]['data']['data']
             stock_time = stock_info['data']['{}{}'.format(self.location, self.stock_no)]['data']['date']
-            # print(stock_time)
-            # input('-----------')
-            # time = Time()
-            # time.Year = int(stock_time[:4])
-            # time.Month = int(stock_time[4:6])
-            # time.Day = int(stock_time[6:8])
-            # date =
             df = pd.DataFrame([data.split(' ')[:2] for data in stock_list])
             df.columns = ['time', 'close']
             for i in range(len(df['time'])):
                 df['time'][i] = stock_time + df['time'][i]
-            # print(df)
-            # print(df['time'].size)
-            # input('---------------')
             df['close'].astype(float)
             self.stockdata = df
             return success, df
         else:
             return success, None
 
-    def get_stock_history1minData(self, location, stock_no, day_before):
+    def get_stock_history1minData(self, location=None, stock_no=None, day_before=1):
         # 800 pieces of data from Tencent at most
+        if(location==None):
+            location = self.location
+        if(stock_no==None):
+            stock_no = self.stock_no
         data_count = day_before * 241
         if(data_count>800):
             data_count = 800
@@ -57,7 +51,7 @@ class StockData():
             return success, None
 
 
-    def get_stock_currentData(self, location, stock_no):
+    def get_stock_currentData(self, location=None, stock_no=None):
         if(location==None):
             location = self.location
         if(stock_no==None):
